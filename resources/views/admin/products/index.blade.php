@@ -1,97 +1,136 @@
-@extends('admin.layouts.app')
-
+@extends('layouts.admin')
 @section('title', 'Products')
-
 @section('content')
-<x-admin::breadcrumb :items="[['label' => 'Products']]" />
-
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h2 class="text-xl font-bold text-gray-900">Products</h2>
-        <p class="text-sm text-gray-500 mt-0.5">Manage your product inventory</p>
+        <h1 class="text-2xl font-bold text-white">Products</h1>
+        <p class="text-sm text-gray-400 mt-1">Manage your product inventory</p>
     </div>
-    <a href="{{ route('admin.products.create') }}" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition inline-flex items-center gap-1">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
+    <a href="{{ route('admin.products.create') }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
         Add Product
     </a>
 </div>
 
 <form method="GET" class="mb-6">
     <div class="flex flex-wrap gap-3">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..."
-               class="flex-1 min-w-[200px] max-w-sm rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-        <select name="category" class="rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-            <option value="">All Categories</option>
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." class="bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition flex-1 min-w-[200px] max-w-sm">
+        <select name="category" class="bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+            <option value="" class="bg-gray-900">All Categories</option>
             @foreach($categories as $cat)
-                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }} class="bg-gray-900">{{ $cat->name }}</option>
             @endforeach
         </select>
-        <select name="stock" class="rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-            <option value="">All Stock</option>
-            <option value="low" {{ request('stock') === 'low' ? 'selected' : '' }}>Low Stock</option>
-            <option value="out" {{ request('stock') === 'out' ? 'selected' : '' }}>Out of Stock</option>
+        <select name="stock" class="bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+            <option value="" class="bg-gray-900">All Stock</option>
+            <option value="low" {{ request('stock') === 'low' ? 'selected' : '' }} class="bg-gray-900">Low Stock</option>
+            <option value="out" {{ request('stock') === 'out' ? 'selected' : '' }} class="bg-gray-900">Out of Stock</option>
         </select>
-        <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition">Filter</button>
+        <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Filter</button>
         @if(request('search') || request('category') || request('stock'))
-            <a href="{{ route('admin.products.index') }}" class="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition">Clear</a>
+            <a href="{{ route('admin.products.index') }}" class="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Clear</a>
         @endif
     </div>
 </form>
 
-<x-admin::admin-table :headers="['ID', 'Product', 'Category', 'Price', 'Stock', 'Status', 'Featured']">
-    @forelse($products as $product)
-        <tr>
-            <td class="px-4 py-3 text-gray-900 font-medium">#{{ $product->id }}</td>
-            <td class="px-4 py-3">
-                <div class="flex items-center gap-3">
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-10 h-10 rounded-lg object-cover">
-                    @else
-                        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg">👕</div>
-                    @endif
-                    <div>
-                        <span class="font-medium text-gray-900">{{ $product->name }}</span>
-                        <p class="text-xs text-gray-400">{{ $product->slug }}</p>
-                    </div>
-                </div>
-            </td>
-            <td class="px-4 py-3 text-gray-500 text-sm">{{ $product->category->name ?? 'N/A' }}</td>
-            <td class="px-4 py-3">
-                <span class="font-medium text-gray-900">${{ number_format($product->price, 2) }}</span>
-                @if($product->discount_price)
-                    <span class="text-xs text-green-600 block">${{ number_format($product->discount_price, 2) }}</span>
-                @endif
-            </td>
-            <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
-                    {{ $product->stock <= 0 ? 'bg-red-100 text-red-700' : ($product->stock <= 5 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
-                    {{ $product->stock <= 0 ? 'Out of Stock' : $product->stock }}
-                </span>
-            </td>
-            <td class="px-4 py-3"><x-admin::status-badge :status="$product->status" /></td>
-            <td class="px-4 py-3">
-                @if($product->featured)
-                    <span class="text-yellow-500 text-lg">★</span>
-                @else
-                    <span class="text-gray-300 text-lg">★</span>
-                @endif
-            </td>
-            <td class="px-4 py-3 text-right">
-                <div class="flex items-center justify-end gap-2">
-                    <a href="{{ route('admin.products.edit', $product) }}" class="px-3 py-1.5 text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition">Edit</a>
-                    <button type="button" onclick="openModal('deleteProduct-{{ $product->id }}')" class="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition">Delete</button>
-                    <x-admin::modal :id="'deleteProduct-' . $product->id" title="Delete Product?" action="{{ route('admin.products.destroy', $product) }}">
-                        Are you sure you want to delete <strong>{{ $product->name }}</strong>? This cannot be undone.
-                    </x-admin::modal>
-                </div>
-            </td>
-        </tr>
-    @empty
-        <tr><td colspan="8" class="px-4 py-8 text-center text-gray-400">No products found.</td></tr>
-    @endforelse
-</x-admin::admin-table>
+<div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-gray-800">
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Featured</th>
+                    <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800/50">
+                @forelse($products as $product)
+                    <tr class="hover:bg-white/[0.02] transition">
+                        <td class="px-4 py-3 text-gray-500 font-medium">#{{ $product->id }}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-3">
+                                @if($product->image)
+                                    <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-9 h-9 rounded-lg object-cover">
+                                @else
+                                    <div class="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center text-sm">👕</div>
+                                @endif
+                                <div>
+                                    <span class="font-medium text-gray-300">{{ $product->name }}</span>
+                                    <p class="text-xs text-gray-600">{{ $product->slug }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-500 text-sm">{{ $product->category->name ?? 'N/A' }}</td>
+                        <td class="px-4 py-3">
+                            <span class="font-medium text-gray-300">{{ formatPrice($product->price) }}</span>
+                            @if($product->discount_price)
+                                <span class="text-xs text-emerald-400 block">{{ formatPrice($product->discount_price) }}</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                {{ $product->stock <= 0 ? 'bg-red-500/10 text-red-400' : ($product->stock <= 5 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400') }}">
+                                {{ $product->stock <= 0 ? 'Out of Stock' : $product->stock }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($product->status)
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400">Active</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-500/10 text-gray-400">Inactive</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3">
+                            @if($product->featured)
+                                <span class="text-amber-400 text-lg">★</span>
+                            @else
+                                <span class="text-gray-700 text-lg">★</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <a href="{{ route('admin.products.edit', $product) }}" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">Edit</a>
+                                <button type="button" onclick="openModal('deleteProduct-{{ $product->id }}')" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">Delete</button>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr><td colspan="8" class="px-4 py-10 text-center text-gray-500">No products found.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+</div>
 
-<x-admin::pagination :paginator="$products" />
+@if($products->hasPages())
+    <div class="mt-4">{{ $products->links() }}</div>
+@endif
+
+{{-- Delete Modals --}}
+@foreach($products as $product)
+    <div id="deleteProduct-{{ $product->id }}" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" onclick="if(event.target===this)closeModal('deleteProduct-{{ $product->id }}')">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="relative bg-gray-900 border border-gray-800 rounded-xl p-6 w-full max-w-md">
+            <h3 class="text-lg font-bold text-white mb-2">Delete Product?</h3>
+            <p class="text-sm text-gray-400 mb-6">Are you sure you want to delete <strong class="text-gray-300">{{ $product->name }}</strong>? This cannot be undone.</p>
+            <form action="{{ route('admin.products.destroy', $product) }}" method="POST">
+                @csrf @method('DELETE')
+                <div class="flex items-center gap-3 justify-end">
+                    <button type="button" onclick="closeModal('deleteProduct-{{ $product->id }}')" class="px-4 py-2 text-sm font-medium rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endforeach
+
+<script>
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+</script>
 @endsection

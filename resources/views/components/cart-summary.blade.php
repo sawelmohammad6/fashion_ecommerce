@@ -10,11 +10,11 @@
         </div>
         <div class="flex justify-between text-gray-600">
             <span>Subtotal</span>
-            <span class="font-medium text-gray-900">${{ number_format($total, 2) }}</span>
+            <span class="font-medium text-gray-900">{{ formatPrice($total) }}</span>
         </div>
         <div class="border-t border-gray-100 pt-2 flex justify-between text-base">
             <span class="font-semibold text-gray-900">Estimated Total</span>
-            <span class="font-bold text-indigo-600">${{ number_format($total, 2) }}</span>
+            <span class="font-bold text-indigo-600">{{ formatPrice($total) }}</span>
         </div>
     </div>
 

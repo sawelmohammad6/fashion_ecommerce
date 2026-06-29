@@ -6,10 +6,10 @@
     <p>Your order <strong>#{{ $order->id }}</strong> has been placed successfully. Here's a summary:</p>
     <table><tr><th>Product</th><th>Qty</th><th>Total</th></tr>
     @foreach($order->items as $item)
-        <tr><td>{{ $item->product->name ?? 'N/A' }}</td><td>{{ $item->quantity }}</td><td>${{ number_format($item->price * $item->quantity, 2) }}</td></tr>
+        <tr><td>{{ $item->product->name ?? 'N/A' }}</td><td>{{ $item->quantity }}</td><td>{{ formatPrice($item->price * $item->quantity) }}</td></tr>
     @endforeach
     </table>
-    <p><strong>Total:</strong> ${{ number_format($order->grand_total, 2) }}</p>
+    <p><strong>Total:</strong> {{ formatPrice($order->grand_total) }}</p>
     <p><strong>Shipping to:</strong> {{ $order->address }}, {{ $order->district }}, {{ $order->division }}</p>
     <a href="{{ route('orders.show', $order) }}" class="btn">View Order</a>
     <p style="color:#999;font-size:12px;margin-top:20px">Thank you for shopping with us!</p>

@@ -1,55 +1,47 @@
-@extends('admin.layouts.app')
-
+@extends('layouts.admin')
 @section('title', 'Edit Category')
-
 @section('content')
-<x-admin::breadcrumb :items="[['label' => 'Categories', 'url' => route('admin.categories.index')], ['label' => 'Edit']]" />
+<div class="mb-6">
+    <a href="{{ route('admin.categories.index') }}" class="text-sm text-gray-500 hover:text-gray-300 transition inline-flex items-center gap-1">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+        Back to Categories
+    </a>
+</div>
 
 <div class="max-w-2xl">
-    <h2 class="text-xl font-bold text-gray-900 mb-6">Edit Category</h2>
-
-    <form action="{{ route('admin.categories.update', $category) }}" method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-5">
-        @csrf
-        @method('PUT')
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name <span class="text-red-500">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $category->name) }}" class="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none @error('name') border-red-300 @enderror">
-            @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+    <h1 class="text-2xl font-bold text-white mb-6">Edit Category</h1>
+    <form action="{{ route('admin.categories.update', $category) }}" method="POST" enctype="multipart/form-data" class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 space-y-5">
+        @csrf @method('PUT')
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1.5">Name <span class="text-red-400">*</span></label>
+                <input type="text" name="name" value="{{ old('name', $category->name) }}" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition @error('name') border-red-500/50 @enderror">
+                @error('name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-1.5">Slug <span class="text-red-400">*</span></label>
+                <input type="text" name="slug" value="{{ old('slug', $category->slug) }}" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition @error('slug') border-red-500/50 @enderror">
+                @error('slug') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+            </div>
         </div>
-
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Slug <span class="text-red-500">*</span></label>
-            <input type="text" name="slug" value="{{ old('slug', $category->slug) }}" class="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none @error('slug') border-red-300 @enderror">
-            @error('slug') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            <label class="block text-sm font-medium text-gray-400 mb-1.5">Description</label>
+            <textarea name="description" rows="3" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">{{ old('description', $category->description) }}</textarea>
         </div>
-
         <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea name="description" rows="3" class="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 outline-none">{{ old('description', $category->description) }}</textarea>
-        </div>
-
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+            <label class="block text-sm font-medium text-gray-400 mb-1.5">Image</label>
             @if($category->image)
-                <div class="mb-2">
-                    <img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-20 h-20 rounded-lg object-cover">
-                </div>
+                <div class="mb-2"><img src="{{ asset('storage/' . $category->image) }}" alt="{{ $category->name }}" class="w-16 h-16 rounded-lg object-cover border border-gray-700/50"></div>
             @endif
-            <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-            @error('image') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-emerald-500/10 file:text-emerald-400 hover:file:bg-emerald-500/20 transition">
         </div>
-
-        <div>
-            <label class="flex items-center gap-2">
-                <input type="checkbox" name="status" value="1" {{ old('status', $category->status) ? 'checked' : '' }} class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                <span class="text-sm font-medium text-gray-700">Active</span>
-            </label>
+        <div class="flex items-center gap-2">
+            <input type="checkbox" name="status" value="1" {{ old('status', $category->status) ? 'checked' : '' }} class="rounded bg-gray-800 border-gray-600 text-emerald-500 focus:ring-emerald-500/50">
+            <label class="text-sm font-medium text-gray-400">Active</label>
         </div>
-
         <div class="flex items-center gap-3 pt-2">
-            <button type="submit" class="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition">Update Category</button>
-            <a href="{{ route('admin.categories.index') }}" class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition">Cancel</a>
+            <button type="submit" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">Update Category</button>
+            <a href="{{ route('admin.categories.index') }}" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Cancel</a>
         </div>
     </form>
 </div>

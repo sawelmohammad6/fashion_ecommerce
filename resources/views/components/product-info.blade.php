@@ -9,7 +9,7 @@
         <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{{ $product->name }}</h1>
     </div>
 
-    <div class="text-3xl font-bold text-indigo-600">${{ number_format($product->price, 2) }}</div>
+    <div class="text-3xl font-bold text-indigo-600">{{ formatPrice($product->price) }}</div>
 
     <div class="grid grid-cols-2 gap-4 text-sm">
         @if($product->fabric)

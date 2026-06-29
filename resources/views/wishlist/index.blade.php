@@ -30,7 +30,7 @@
                     </a>
                     <div class="p-3 sm:p-4">
                         <h3 class="font-semibold text-gray-900 text-sm truncate">{{ $p->name }}</h3>
-                        <p class="text-indigo-600 font-bold text-sm mt-1">${{ number_format($p->final_price, 2) }}</p>
+                        <p class="text-indigo-600 font-bold text-sm mt-1">{{ formatPrice($p->final_price) }}</p>
                         <div class="flex gap-2 mt-2">
                             <form action="{{ route('wishlist.moveToCart', $p) }}" method="POST" class="flex-1">
                                 @csrf

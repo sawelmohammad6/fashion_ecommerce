@@ -8,10 +8,10 @@
             <div>
                 <h3 class="font-bold text-gray-900 mb-4">Quick Links</h3>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="{{ route('home') }}" class="text-gray-500 hover:text-indigo-600 transition">Home</a></li>
-                    <li><a href="{{ route('products.index') }}" class="text-gray-500 hover:text-indigo-600 transition">Products</a></li>
-                    <li><a href="{{ route('about') }}" class="text-gray-500 hover:text-indigo-600 transition">About Us</a></li>
-                    <li><a href="{{ route('contact') }}" class="text-gray-500 hover:text-indigo-600 transition">Contact</a></li>
+                    <li><a href="{{ route('home') }}" class="text-gray-500 hover:text-cyan-500 transition">Home</a></li>
+                    <li><a href="{{ route('products.index') }}" class="text-gray-500 hover:text-cyan-500 transition">Products</a></li>
+                    <li><a href="{{ route('about') }}" class="text-gray-500 hover:text-cyan-500 transition">About Us</a></li>
+                    <li><a href="{{ route('contact') }}" class="text-gray-500 hover:text-cyan-500 transition">Contact</a></li>
                 </ul>
             </div>
             <div>

@@ -24,7 +24,7 @@
                     <div><span class="text-gray-400">Ordered</span><p class="font-medium text-gray-900">{{ $order->ordered_at ? $order->ordered_at->format('d M Y, h:i A') : $order->created_at->format('d M Y, h:i A') }}</p></div>
                     <div><span class="text-gray-400">Payment</span><p class="font-medium text-gray-900 capitalize">{{ str_replace('_', ' ', $order->payment_method) }}</p></div>
                     <div><span class="text-gray-400">Payment Status</span><p class="font-medium text-{{ $order->payment_status === 'paid' ? 'green' : 'amber' }}-600 capitalize">{{ $order->payment_status }}</p></div>
-                    <div><span class="text-gray-400">Total</span><p class="font-bold text-indigo-600">${{ number_format($order->grand_total, 2) }}</p></div>
+                    <div><span class="text-gray-400">Total</span><p class="font-bold text-indigo-600">{{ formatPrice($order->grand_total) }}</p></div>
                 </div>
             </div>
 
@@ -64,17 +64,17 @@
                             </div>
                             <div class="flex-1 min-w-0">
                                 <p class="font-medium text-gray-900 text-sm">{{ $item->product->name }}</p>
-                                <p class="text-xs text-gray-500">Qty: {{ $item->quantity }} &times; ${{ number_format($item->price, 2) }}</p>
+                                <p class="text-xs text-gray-500">Qty: {{ $item->quantity }} &times; {{ formatPrice($item->price) }}</p>
                             </div>
-                            <p class="font-medium text-gray-900 text-sm">${{ number_format($item->price * $item->quantity, 2) }}</p>
+                            <p class="font-medium text-gray-900 text-sm">{{ formatPrice($item->price * $item->quantity) }}</p>
                         </div>
                     @endforeach
                 </div>
                 <div class="border-t border-gray-100 pt-4 mt-4 space-y-1 text-sm">
-                    <div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span class="font-medium">${{ number_format($order->subtotal, 2) }}</span></div>
-                    <div class="flex justify-between"><span class="text-gray-500">Shipping</span><span class="font-medium">{{ $order->shipping_charge > 0 ? '$' . number_format($order->shipping_charge, 2) : 'Free' }}</span></div>
-                    @if($order->discount > 0)<div class="flex justify-between text-green-600"><span>Discount</span><span>-${{ number_format($order->discount, 2) }}</span></div>@endif
-                    <div class="flex justify-between text-base border-t border-gray-100 pt-2"><span class="font-semibold">Total</span><span class="font-bold text-indigo-600">${{ number_format($order->grand_total, 2) }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Subtotal</span><span class="font-medium">{{ formatPrice($order->subtotal) }}</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Shipping</span><span class="font-medium">{{ $order->shipping_charge > 0 ? formatPrice($order->shipping_charge) : 'Free' }}</span></div>
+                    @if($order->discount > 0)<div class="flex justify-between text-green-600"><span>Discount</span><span>-{{ formatPrice($order->discount) }}</span></div>@endif
+                    <div class="flex justify-between text-base border-t border-gray-100 pt-2"><span class="font-semibold">Total</span><span class="font-bold text-indigo-600">{{ formatPrice($order->grand_total) }}</span></div>
                 </div>
             </div>
         </div>

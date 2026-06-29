@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CouponController as AdminCouponController;
+use App\Http\Controllers\Admin\CurrencySettingController as AdminCurrencySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -40,6 +42,9 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::get('/search', [SearchController::class, 'index'])->name('search');
 
 Route::get('/dashboard', function () {
+    if (auth()->user()?->is_admin) {
+        return redirect()->intended(route('admin.dashboard'));
+    }
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -76,7 +81,7 @@ Route::middleware('auth')->group(function () {
 // Admin Routes
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.dashboard'));
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
 
     Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
@@ -113,11 +118,42 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         return view('admin.reports.index');
     })->name('reports.index');
 
+    Route::get('/banners', [AdminBannerController::class, 'index'])->name('banners.index');
+    Route::get('/banners/create', [AdminBannerController::class, 'create'])->name('banners.create');
+    Route::post('/banners', [AdminBannerController::class, 'store'])->name('banners.store');
+    Route::get('/banners/{banner}/edit', [AdminBannerController::class, 'edit'])->name('banners.edit');
+    Route::put('/banners/{banner}', [AdminBannerController::class, 'update'])->name('banners.update');
+    Route::delete('/banners/{banner}', [AdminBannerController::class, 'destroy'])->name('banners.destroy');
+    Route::post('/banners/{banner}/toggle', [AdminBannerController::class, 'toggle'])->name('banners.toggle');
+
+    Route::get('/currency-settings', [AdminCurrencySettingController::class, 'index'])->name('currency-settings.index');
+    Route::get('/currency-settings/create', [AdminCurrencySettingController::class, 'create'])->name('currency-settings.create');
+    Route::post('/currency-settings', [AdminCurrencySettingController::class, 'store'])->name('currency-settings.store');
+    Route::get('/currency-settings/{currencySetting}/edit', [AdminCurrencySettingController::class, 'edit'])->name('currency-settings.edit');
+    Route::put('/currency-settings/{currencySetting}', [AdminCurrencySettingController::class, 'update'])->name('currency-settings.update');
+    Route::delete('/currency-settings/{currencySetting}', [AdminCurrencySettingController::class, 'destroy'])->name('currency-settings.destroy');
+    Route::post('/currency-settings/{currencySetting}/toggle', [AdminCurrencySettingController::class, 'toggle'])->name('currency-settings.toggle');
+
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
 
     Route::get('/profile', [AdminSettingController::class, 'profile'])->name('profile');
     Route::post('/profile', [AdminSettingController::class, 'updateProfile'])->name('profile.update');
+
+    // Global search
+    Route::get('/search', function (\Illuminate\Http\Request $request) {
+        $query = $request->get('q');
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+        $products = \App\Models\Product::where('name', 'LIKE', "%{$query}%")
+            ->orWhere('description', 'LIKE', "%{$query}%")
+            ->limit(8)->get(['id', 'name', 'slug']);
+        return response()->json($products->map(fn ($p) => [
+            'name' => $p->name,
+            'url' => route('admin.products.edit', $p),
+        ]));
+    })->name('search');
 });
 
 require __DIR__.'/auth.php';

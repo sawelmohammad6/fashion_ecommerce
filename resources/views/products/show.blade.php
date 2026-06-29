@@ -66,19 +66,23 @@ input[type=number] { -moz-appearance: textfield; }
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                 @foreach($related as $rel)
                     <a href="{{ route('products.show', $rel->slug) }}" class="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition">
-                        <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4">
-                            <div class="text-4xl group-hover:scale-110 transition-transform">
-                                @switch($rel->category->slug ?? '')
-                                    @case('mens-t-shirt') 👕 @break
-                                    @case('womens-t-shirt') 👚 @break
-                                    @case('bags') 👜 @break
-                                    @default ✨
-                                @endswitch
-                            </div>
+                        <div class="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-4 overflow-hidden">
+                            @if($rel->image)
+                                <img src="{{ asset('storage/' . $rel->image) }}" alt="{{ $rel->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                            @else
+                                <div class="text-4xl group-hover:scale-110 transition-transform">
+                                    @switch($rel->category->slug ?? '')
+                                        @case('mens-t-shirt') 👕 @break
+                                        @case('womens-t-shirt') 👚 @break
+                                        @case('bags') 👜 @break
+                                        @default ✨
+                                    @endswitch
+                                </div>
+                            @endif
                         </div>
                         <div class="p-3 sm:p-4">
                             <h3 class="font-semibold text-gray-900 text-sm truncate">{{ $rel->name }}</h3>
-                            <p class="text-indigo-600 font-bold text-sm mt-1">${{ number_format($rel->price, 2) }}</p>
+                            <p class="text-indigo-600 font-bold text-sm mt-1">{{ formatPrice($rel->price) }}</p>
                         </div>
                     </a>
                 @endforeach

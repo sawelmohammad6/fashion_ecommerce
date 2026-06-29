@@ -24,7 +24,7 @@
             </div>
             <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Order Total</span>
-                <span class="font-bold text-indigo-600">${{ number_format($order->grand_total, 2) }}</span>
+                <span class="font-bold text-indigo-600">{{ formatPrice($order->grand_total) }}</span>
             </div>
             <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Status</span>

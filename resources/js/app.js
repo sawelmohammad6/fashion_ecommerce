@@ -1,12 +1,13 @@
 import './bootstrap';
-
 import Alpine from 'alpinejs';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
+window.Chart = Chart;
 
 window.Alpine = Alpine;
-
 Alpine.start();
 
-// Scroll fade-in animation
 document.addEventListener('DOMContentLoaded', function () {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -15,11 +16,10 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.scroll-fade-in').forEach(el => observer.observe(el));
-});
-
-// Smooth page load
-document.addEventListener('DOMContentLoaded', function () {
     document.body.classList.add('page-loaded');
+
+    document.querySelectorAll('[data-toast]').forEach(el => {
+        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(40px)'; el.style.transition = 'all 0.3s ease-out'; setTimeout(() => el.remove(), 300); }, 4000);
+    });
 });

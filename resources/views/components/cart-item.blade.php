@@ -17,7 +17,7 @@
                class="font-semibold text-gray-900 hover:text-indigo-600 transition text-sm sm:text-base block truncate">
                 {{ $item['name'] }}
             </a>
-            <p class="text-indigo-600 font-bold text-sm sm:text-base mt-1">${{ number_format($item['price'], 2) }}</p>
+            <p class="text-indigo-600 font-bold text-sm sm:text-base mt-1">{{ formatPrice($item['price']) }}</p>
         </div>
 
         <div class="flex items-center gap-3">
@@ -33,7 +33,7 @@
         </div>
 
         <div class="text-right shrink-0">
-            <p class="cart-subtotal font-bold text-gray-900 text-sm sm:text-base">${{ number_format($item['price'] * $item['quantity'], 2) }}</p>
+            <p class="cart-subtotal font-bold text-gray-900 text-sm sm:text-base">{{ formatPrice($item['price'] * $item['quantity']) }}</p>
             <form action="{{ route('cart.remove', $item['id']) }}" method="POST" class="inline" onsubmit="return confirm('Remove this item from cart?')">
                 @csrf
                 @method('DELETE')

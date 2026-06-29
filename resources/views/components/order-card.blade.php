@@ -9,7 +9,7 @@
         </div>
         <div class="flex items-center gap-4">
             <div class="text-right">
-                <p class="font-bold text-indigo-600">${{ number_format($order->grand_total, 2) }}</p>
+                <p class="font-bold text-indigo-600">{{ formatPrice($order->grand_total) }}</p>
                 <p class="text-xs text-gray-500">{{ $order->items_count ?? $order->items->count() }} item(s)</p>
             </div>
             <x-order-status :status="$order->status" />

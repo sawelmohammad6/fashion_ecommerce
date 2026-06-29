@@ -1,12 +1,14 @@
-<aside class="w-64 bg-gray-900 text-white flex flex-col shrink-0 min-h-screen">
-    <div class="px-6 py-5 border-b border-gray-800">
-        <a href="{{ route('admin.dashboard') }}" class="text-xl font-bold tracking-tight">
-            {{ config('app.name') }}
+<aside class="h-full flex flex-col bg-gray-950/95 backdrop-blur-2xl border-r border-white/5">
+    <div class="px-6 py-6 border-b border-white/5">
+        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-emerald-500/20">F</div>
+            <div>
+                <p class="text-base font-bold text-white tracking-tight">{{ config('app.name') }}</p>
+                <p class="text-[10px] text-emerald-400/70 font-medium uppercase tracking-widest">Admin Panel</p>
+            </div>
         </a>
-        <p class="text-xs text-gray-400 mt-0.5">Admin Panel</p>
     </div>
-
-    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+    <nav class="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto sidebar-scroll">
         @php
             $menuItems = [
                 ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
@@ -20,24 +22,23 @@
                 ['label' => 'Profile', 'route' => 'admin.profile', 'icon' => 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'],
             ];
         @endphp
-
         @foreach($menuItems as $item)
+            @php $active = request()->routeIs($item['route']) || request()->routeIs($item['route'] . '.*'); @endphp
             <a href="{{ route($item['route']) }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition
-               {{ request()->routeIs($item['route']) || request()->routeIs($item['route'] . '.*') ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white' }}">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group
+               {{ $active ? 'bg-emerald-500/10 text-emerald-400 shadow-sm shadow-emerald-500/5' : 'text-white/50 hover:text-white hover:bg-white/5' }}">
+                <svg class="w-5 h-5 shrink-0 {{ $active ? 'text-emerald-400' : 'text-white/30 group-hover:text-white/60' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="{{ $item['icon'] }}" />
                 </svg>
                 {{ $item['label'] }}
             </a>
         @endforeach
     </nav>
-
-    <div class="px-3 py-4 border-t border-gray-800">
+    <div class="px-3 py-4 border-t border-white/5">
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-800 hover:text-white transition">
-                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="submit" class="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 group">
+                <svg class="w-5 h-5 shrink-0 text-white/30 group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
                 Logout

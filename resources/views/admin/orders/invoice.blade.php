@@ -1,73 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Invoice #{{ $order->id }}</title>
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; color: #333; }
-        .header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 40px; }
-        .title { font-size: 28px; font-weight: bold; color: #4f46e5; margin: 0; }
-        .meta { font-size: 13px; color: #666; line-height: 1.6; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        th { text-align: left; padding: 10px 12px; background: #f3f4f6; font-size: 12px; text-transform: uppercase; color: #666; }
-        td { padding: 12px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
-        .total-row td { font-weight: bold; border-top: 2px solid #333; }
-        .grand-total td { font-size: 16px; color: #4f46e5; }
-        .footer { text-align: center; font-size: 12px; color: #999; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-        .address { margin-bottom: 30px; }
-        @media print { body { margin: 0; } }
-    </style>
-</head>
+<head><meta charset="utf-8"><title>Invoice #{{ $order->id }} - {{ config('app.name') }}</title>
+<style>body{font-family:sans-serif;background:#0f172a;color:#e2e8f0;padding:40px;max-width:800px;margin:auto}.invoice{border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:40px;background:rgba(255,255,255,0.02)}h1{font-size:28px;color:#10b981;margin:0 0 4px}.header{display:flex;justify-content:space-between;align-items:start;margin-bottom:32px}.meta{color:rgba(255,255,255,0.4);font-size:14px;line-height:1.8}table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;padding:12px 8px;color:rgba(255,255,255,0.4);border-bottom:1px solid rgba(255,255,255,0.1);font-size:12px;text-transform:uppercase;letter-spacing:0.5px}td{padding:12px 8px;border-bottom:1px solid rgba(255,255,255,0.05)}.total-row td{font-weight:bold;border-top:2px solid rgba(16,185,129,0.3)}.footer{text-align:center;margin-top:32px;color:rgba(255,255,255,0.3);font-size:12px}.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;background:rgba(16,185,129,0.15);color:#34d399}@media print{body{background:white;color:#1e293b;padding:20px}.invoice{background:white;border-color:#e2e8f0}.meta{color:#94a3b8}th{color:#64748b}td{border-color:#f1f5f9}.badge{background:#d1fae5;color:#059669}.footer{color:#94a3b8}h1{color:#059669}}</style></head>
 <body>
+<div class="invoice">
     <div class="header">
-        <div>
-            <h1 class="title">{{ config('app.name') }}</h1>
-            <p class="meta">Invoice</p>
-        </div>
-        <div class="meta">
-            <p><strong>Order #{{ $order->id }}</strong></p>
-            <p>Date: {{ $order->ordered_at ? $order->ordered_at->format('d M Y') : $order->created_at->format('d M Y') }}</p>
-            <p>Status: {{ ucfirst($order->status) }}</p>
-        </div>
+        <div><h1>{{ config('app.name') }}</h1><p style="color:rgba(255,255,255,0.3);margin:2px 0 0">Invoice</p></div>
+        <div style="text-align:right"><span class="badge">{{ ucfirst($order->status) }}</span><p class="meta" style="margin-top:8px">Date: {{ $order->created_at->format('M d, Y') }}</p></div>
     </div>
-
-    <div class="address">
-        <p class="meta"><strong>Bill To:</strong></p>
-        <p class="meta">{{ $order->customer_name }}</p>
-        <p class="meta">{{ $order->phone }}</p>
-        <p class="meta">{{ $order->email }}</p>
-        <p class="meta">{{ $order->address }}, {{ $order->district }}, {{ $order->division }}</p>
+    <div style="display:flex;justify-content:space-between;margin-bottom:32px">
+        <div class="meta"><strong style="color:#e2e8f0">Bill To:</strong><br>{{ $order->customer_name }}<br>{{ $order->email }}<br>{{ $order->phone }}</div>
+        <div class="meta" style="text-align:right"><strong style="color:#e2e8f0">Order ID:</strong><br>#{{ $order->id }}<br>{{ $order->address }}, {{ $order->upazila }}<br>{{ $order->district }}, {{ $order->postal_code }}</div>
     </div>
-
-    <table>
-        <thead>
-            <tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr>
-        </thead>
+    <table><thead><tr><th>Item</th><th>Price</th><th>Qty</th><th style="text-align:right">Total</th></tr></thead>
         <tbody>
             @foreach($order->items as $item)
-                <tr>
-                    <td>{{ $item->product->name ?? 'Deleted Product' }}</td>
-                    <td>${{ number_format($item->price, 2) }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>${{ number_format($item->price * $item->quantity, 2) }}</td>
-                </tr>
+            <tr><td>{{ $item->product->name ?? 'Product' }}</td><td>{{ formatPrice($item->price) }}</td><td>{{ $item->quantity }}</td><td style="text-align:right">{{ formatPrice($item->price * $item->quantity) }}</td></tr>
             @endforeach
         </tbody>
     </table>
-
-    <table>
-        <tr><td style="text-align:right">Subtotal</td><td style="width:120px;text-align:right">${{ number_format($order->subtotal, 2) }}</td></tr>
-        <tr><td style="text-align:right">Shipping</td><td style="text-align:right">{{ $order->shipping_charge > 0 ? '$' . number_format($order->shipping_charge, 2) : 'Free' }}</td></tr>
-        @if($order->discount > 0)
-            <tr><td style="text-align:right">Discount</td><td style="text-align:right;color:#16a34a">-${{ number_format($order->discount, 2) }}</td></tr>
-        @endif
-        <tr class="grand-total"><td style="text-align:right">Grand Total</td><td style="text-align:right">${{ number_format($order->grand_total, 2) }}</td></tr>
-    </table>
-
-    <div class="footer">
-        <p>{{ config('app.name') }} &mdash; Thank you for your business!</p>
+    <div style="width:300px;margin-left:auto;margin-top:16px">
+        <div style="display:flex;justify-content:space-between;color:rgba(255,255,255,0.5);font-size:14px;padding:4px 0"><span>Subtotal</span><span>{{ formatPrice($order->subtotal) }}</span></div>
+        <div style="display:flex;justify-content:space-between;color:rgba(255,255,255,0.5);font-size:14px;padding:4px 0"><span>Shipping</span><span>{{ formatPrice($order->shipping_charge) }}</span></div>
+        @if($order->discount > 0)<div style="display:flex;justify-content:space-between;color:#34d399;font-size:14px;padding:4px 0"><span>Discount</span><span>-{{ formatPrice($order->discount) }}</span></div>@endif
+        <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:bold;padding:8px 0;border-top:2px solid rgba(16,185,129,0.3);margin-top:4px"><span style="color:#e2e8f0">Total</span><span style="color:#10b981">{{ formatPrice($order->grand_total) }}</span></div>
     </div>
-
-    <script>window.print();</script>
+    <div class="footer"><p>Thank you for your business!</p></div>
+</div>
+<script>window.print();</script>
 </body>
 </html>
