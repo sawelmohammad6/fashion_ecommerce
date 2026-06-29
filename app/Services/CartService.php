@@ -57,7 +57,8 @@ class CartService
     public function getTotal(): float
     {
         $cart = $this->getCart();
-        return array_sum(array_map(fn($item) => $item['price'] * $item['quantity'], $cart));
+
+        return array_sum(array_map(fn ($item) => $item['price'] * $item['quantity'], $cart));
     }
 
     public function getCount(): int

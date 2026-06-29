@@ -32,7 +32,7 @@ class CartController extends Controller
 
         $product = Product::with('category')->findOrFail($id);
 
-        if (!$product->status) {
+        if (! $product->status) {
             return back()->with('error', 'This product is unavailable.');
         }
 
@@ -58,12 +58,14 @@ class CartController extends Controller
     public function remove($id)
     {
         $this->cart->remove($id);
+
         return redirect()->route('cart.index')->with('success', 'Item removed from cart.');
     }
 
     public function clear()
     {
         $this->cart->clear();
+
         return redirect()->route('cart.index')->with('success', 'Cart cleared.');
     }
 }

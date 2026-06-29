@@ -4,6 +4,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion and lifestyle products.')">
+    <meta name="keywords" content="fashion, clothing, accessories, style, shop online">
+    <meta property="og:title" content="@yield('title', config('app.name'))">
+    <meta property="og:description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion.')">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('title', config('app.name'))">
+    <meta name="twitter:description" content="@yield('meta_description', config('app.name') . ' - Your destination for quality fashion.')">
+    <link rel="canonical" href="{{ url()->current() }}">
 
     <title>@yield('title', config('app.name', 'Art Crafts & Fashion'))</title>
 

@@ -18,9 +18,10 @@
         </div>
     </div>
 
-    <button class="w-full py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition text-sm" disabled>
+    <a href="{{ route('checkout.create') }}"
+       class="block w-full text-center py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition text-sm">
         Proceed to Checkout
-    </button>
+    </a>
 
     <a href="{{ route('products.index') }}"
        class="block w-full py-3 text-center border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition text-sm">
