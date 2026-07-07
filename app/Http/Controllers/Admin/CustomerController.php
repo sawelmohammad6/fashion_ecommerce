@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -14,14 +15,23 @@ class CustomerController extends Controller
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('email', 'LIKE', "%{$search}%");
+                $q->where('id', $search)
+                    ->orWhere('name', 'LIKE', "%{$search}%")
+                    ->orWhere('username', 'LIKE', "%{$search}%")
+                    ->orWhere('email', 'LIKE', "%{$search}%")
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
             });
         }
 
+        $perPage = in_array((int) $request->get('per_page'), [10, 25, 50, 100]) ? (int) $request->get('per_page') : 10;
+
         $customers = $query->withCount('orders')
+            ->addSelect(['spent' => Order::selectRaw('COALESCE(SUM(grand_total), 0)')
+                ->whereColumn('user_id', 'users.id')
+                ->whereIn('status', ['delivered', 'completed'])
+            ])
             ->latest()
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         return view('admin.customers.index', compact('customers'));
@@ -33,13 +43,33 @@ class CustomerController extends Controller
             abort(404);
         }
 
-        $customer->load(['orders' => function ($q) {
-            $q->latest()->limit(10);
-        }]);
+        $customer->loadCount([
+            'orders as total_orders',
+            'orders as completed_orders' => fn ($q) => $q->where('status', 'delivered'),
+            'orders as pending_orders' => fn ($q) => $q->where('status', 'pending'),
+            'orders as cancelled_orders' => fn ($q) => $q->where('status', 'cancelled'),
+            'wishlists as wishlist_count',
+        ]);
 
-        $orderCount = $customer->orders()->count();
-        $totalSpent = $customer->orders()->where('status', 'delivered')->sum('grand_total');
+        $recentOrders = $customer->orders()
+            ->withCount('items')
+            ->latest()
+            ->limit(5)
+            ->get();
 
-        return view('admin.customers.show', compact('customer', 'orderCount', 'totalSpent'));
+        $recentWishlists = $customer->wishlists()
+            ->with('product')
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $totalSpent = $customer->totalSpent();
+
+        return view('admin.customers.show', compact(
+            'customer',
+            'recentOrders',
+            'recentWishlists',
+            'totalSpent',
+        ));
     }
 }

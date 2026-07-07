@@ -21,11 +21,20 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
         'is_admin',
         'phone',
         'photo',
+        'status',
+        'gender',
+        'date_of_birth',
+        'address',
+        'city',
+        'country',
+        'postal_code',
+        'last_login_at',
     ];
 
     /**
@@ -48,7 +57,15 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_admin' => 'boolean',
+            'date_of_birth' => 'date',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    public function totalSpent(): float
+    {
+        return (float) $this->orders()->whereIn('status', ['delivered', 'completed'])->sum('grand_total');
     }
 
     public function orders(): HasMany
