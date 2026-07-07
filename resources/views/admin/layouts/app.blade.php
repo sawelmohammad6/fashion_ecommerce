@@ -8,8 +8,9 @@
     <link rel="icon" type="image/x-icon" href="{{ \App\Models\Setting::get('favicon') ? asset('storage/' . \App\Models\Setting::get('favicon')) : asset('favicon.ico') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="min-h-screen">
+<body class="bg-gray-950 text-gray-100 min-h-screen">
     <div class="flex min-h-screen">
         <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto transition-all duration-300 ease-in-out">
             <x-admin::sidebar />
@@ -32,6 +33,23 @@
         </div>
     </div>
     <script>
+    function confirmAction(formId, title, text, confirmText, confirmColor) {
+        Swal.fire({
+            title: title,
+            text: text,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: confirmColor || '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: confirmText || 'Yes, proceed',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(formId).submit();
+            }
+        });
+    }
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');

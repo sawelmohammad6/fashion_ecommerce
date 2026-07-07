@@ -7,6 +7,7 @@
     <title>@yield('title', 'Dashboard') - {{ config('app.name') }} Admin</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-950 text-gray-100 antialiased min-h-screen">
     {{-- Sidebar + overlay --}}
@@ -55,6 +56,23 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('sidebarToggle')?.addEventListener('click', toggleSidebar);
         });
+        function confirmAction(formId, title, text, confirmText, confirmColor) {
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: confirmColor || '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: confirmText || 'Yes, proceed',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(formId).submit();
+                }
+            });
+        }
     </script>
 
     @stack('scripts')

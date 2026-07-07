@@ -12,13 +12,13 @@
     ];
     $iconBg = $colors[$color] ?? $colors['emerald'];
 @endphp
-<div class="glass-card p-5 transition-all duration-300 hover:translate-y-[-2px] group">
+<div class="bg-gray-900/50 border border-gray-800 rounded-xl p-5 transition-all duration-300 hover:translate-y-[-2px] group">
     <div class="flex items-center justify-between">
         <div>
-            <p class="text-xs font-medium text-white/40 uppercase tracking-wider">{{ $title }}</p>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $title }}</p>
             <p class="text-2xl font-bold text-white mt-1.5">{{ $value }}</p>
             @if($subtitle)
-                <p class="text-xs text-white/30 mt-1">{{ $subtitle }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ $subtitle }}</p>
             @endif
         </div>
         <div class="w-11 h-11 rounded-xl bg-gradient-to-br {{ $iconBg }} flex items-center justify-center group-hover:scale-110 transition-transform duration-300">

@@ -53,14 +53,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Checkout
-    Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    // Checkout (blocked users cannot checkout)
+    Route::middleware('blocked')->group(function () {
+        Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
-    // Orders
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-    Route::get('/order/success/{order}', [OrderController::class, 'success'])->name('orders.success');
+        // Orders (blocked users cannot place new orders)
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::get('/order/success/{order}', [OrderController::class, 'success'])->name('orders.success');
+    });
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -106,6 +108,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
 
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{customer}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
+    Route::patch('/customers/{customer}/block', [AdminCustomerController::class, 'block'])->name('customers.block');
+    Route::patch('/customers/{customer}/unblock', [AdminCustomerController::class, 'unblock'])->name('customers.unblock');
+    Route::patch('/customers/{customer}/activate', [AdminCustomerController::class, 'activate'])->name('customers.activate');
+    Route::patch('/customers/{customer}/deactivate', [AdminCustomerController::class, 'deactivate'])->name('customers.deactivate');
+    Route::delete('/customers/{customer}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
+
+    Route::get('/customers/export/csv', [AdminCustomerController::class, 'exportCsv'])->name('customers.export.csv');
+    Route::get('/customers/export/excel', [AdminCustomerController::class, 'exportExcel'])->name('customers.export.excel');
+    Route::post('/customers/bulk', [AdminCustomerController::class, 'bulkAction'])->name('customers.bulk');
 
     Route::get('/coupons', [AdminCouponController::class, 'index'])->name('coupons.index');
     Route::get('/coupons/create', [AdminCouponController::class, 'create'])->name('coupons.create');
