@@ -127,9 +127,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::put('/coupons/{coupon}', [AdminCouponController::class, 'update'])->name('coupons.update');
     Route::delete('/coupons/{coupon}', [AdminCouponController::class, 'destroy'])->name('coupons.destroy');
 
-    Route::get('/reports', function () {
-        return view('admin.reports.index');
-    })->name('reports.index');
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/sales', [\App\Http\Controllers\Admin\ReportController::class, 'sales'])->name('reports.sales');
+    Route::get('/reports/orders', [\App\Http\Controllers\Admin\ReportController::class, 'orders'])->name('reports.orders');
+    Route::get('/reports/products', [\App\Http\Controllers\Admin\ReportController::class, 'products'])->name('reports.products');
+    Route::get('/reports/categories', [\App\Http\Controllers\Admin\ReportController::class, 'categories'])->name('reports.categories');
+    Route::get('/reports/customers', [\App\Http\Controllers\Admin\ReportController::class, 'customers'])->name('reports.customers');
+    Route::get('/reports/payments', [\App\Http\Controllers\Admin\ReportController::class, 'payments'])->name('reports.payments');
+    Route::get('/reports/discounts', [\App\Http\Controllers\Admin\ReportController::class, 'discounts'])->name('reports.discounts');
 
     Route::get('/banners', [AdminBannerController::class, 'index'])->name('banners.index');
     Route::get('/banners/create', [AdminBannerController::class, 'create'])->name('banners.create');
