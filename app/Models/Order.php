@@ -33,12 +33,15 @@ class Order extends Model
         'status',
         'notes',
         'ordered_at',
+        'invoice_no',
+        'status_timeline',
     ];
 
     protected function casts(): array
     {
         return [
-            'ordered_at' => 'datetime',
+            'ordered_at'      => 'datetime',
+            'status_timeline' => 'array',
         ];
     }
 

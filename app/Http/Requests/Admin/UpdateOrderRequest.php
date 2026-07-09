@@ -14,15 +14,15 @@ class UpdateOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', 'in:pending,confirmed,processing,shipped,delivered,cancelled,returned'],
-            'payment_status' => ['required', 'string', 'in:pending,paid,failed,refunded'],
+            'status'         => ['required', 'string', 'in:pending,confirmed,processing,packed,shipped,delivered,cancelled,returned,refunded'],
+            'payment_status' => ['required', 'string', 'in:pending,paid,unpaid,refunded'],
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'status' => 'order status',
+            'status'         => 'order status',
             'payment_status' => 'payment status',
         ];
     }

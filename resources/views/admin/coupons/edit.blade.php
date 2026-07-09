@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('layouts.admin')
 @section('title', 'Edit Coupon')
 @section('content')
 <x-admin::breadcrumb :items="[['label' => 'Coupons', 'url' => route('admin.coupons.index')], ['label' => 'Edit']]" />

@@ -36,6 +36,7 @@ class User extends Authenticatable
         'country',
         'postal_code',
         'last_login_at',
+        'bio',
     ];
 
     /**

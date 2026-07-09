@@ -102,8 +102,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/products/{product}/delete-gallery/{index}', [AdminProductController::class, 'deleteGalleryImage'])->name('products.deleteGalleryImage');
 
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/export/csv', [AdminOrderController::class, 'exportCsv'])->name('orders.export.csv');
+    Route::get('/orders/export/excel', [AdminOrderController::class, 'exportExcel'])->name('orders.export.excel');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::put('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+    Route::post('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.status');
+    Route::get('/orders/{order}/statuses', [AdminOrderController::class, 'statuses'])->name('orders.statuses');
     Route::get('/orders/{order}/invoice', [AdminOrderController::class, 'invoice'])->name('orders.invoice');
 
     Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
@@ -155,8 +159,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
     Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
 
-    Route::get('/profile', [AdminSettingController::class, 'profile'])->name('profile');
-    Route::post('/profile', [AdminSettingController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [\App\Http\Controllers\Admin\ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/avatar', [\App\Http\Controllers\Admin\ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::delete('/profile/avatar', [\App\Http\Controllers\Admin\ProfileController::class, 'removeAvatar'])->name('profile.avatar.remove');
 
     // Global search
     Route::get('/search', function (\Illuminate\Http\Request $request) {
