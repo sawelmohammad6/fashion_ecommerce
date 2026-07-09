@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\UpdateOrderRequest;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\OrderService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -138,8 +139,8 @@ class OrderController extends Controller
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
                 'Order ID', 'Invoice No', 'Customer Name', 'Phone', 'Email',
-                'Subtotal', 'Discount', 'Shipping', 'Grand Total',
-                'Payment Method', 'Payment Status', 'Order Status',
+                'Subtotal', 'Discount', 'Coupon Code', 'Tax', 'Shipping', 'Grand Total',
+                'Payment Method', 'Payment Status', 'Transaction ID', 'Order Status',
                 'Items Count', 'Order Date',
             ]);
 
@@ -152,10 +153,13 @@ class OrderController extends Controller
                     $order->email,
                     $order->subtotal,
                     $order->discount,
+                    $order->coupon_code ?? '',
+                    $order->tax,
                     $order->shipping_charge,
                     $order->grand_total,
                     $order->payment_method,
                     $order->payment_status,
+                    $order->transaction_id ?? '',
                     $order->status,
                     $order->items_count,
                     $order->ordered_at?->format('Y-m-d H:i') ?? $order->created_at->format('Y-m-d H:i'),
@@ -180,10 +184,13 @@ class OrderController extends Controller
             $order->email,
             $order->subtotal,
             $order->discount,
+            $order->coupon_code ?? '',
+            $order->tax,
             $order->shipping_charge,
             $order->grand_total,
             $order->payment_method,
             $order->payment_status,
+            $order->transaction_id ?? '',
             $order->status,
             $order->items_count,
             $order->ordered_at?->format('Y-m-d H:i') ?? $order->created_at->format('Y-m-d H:i'),
@@ -198,8 +205,8 @@ class OrderController extends Controller
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
                 'Order ID', 'Invoice No', 'Customer Name', 'Phone', 'Email',
-                'Subtotal', 'Discount', 'Shipping', 'Grand Total',
-                'Payment Method', 'Payment Status', 'Order Status',
+                'Subtotal', 'Discount', 'Coupon Code', 'Tax', 'Shipping', 'Grand Total',
+                'Payment Method', 'Payment Status', 'Transaction ID', 'Order Status',
                 'Items Count', 'Order Date',
             ]);
             foreach ($rows as $row) {
@@ -236,5 +243,15 @@ class OrderController extends Controller
             'status'    => $order->fresh()->status,
             'timeline'  => $order->fresh()->status_timeline,
         ]);
+    }
+
+    public function pdf(Order $order)
+    {
+        $order->load('items.product');
+
+        $pdf = Pdf::loadView('admin.orders.pdf', compact('order'));
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->download('invoice-' . ($order->invoice_no ?? $order->id) . '.pdf');
     }
 }

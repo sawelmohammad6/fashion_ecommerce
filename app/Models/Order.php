@@ -35,6 +35,9 @@ class Order extends Model
         'ordered_at',
         'invoice_no',
         'status_timeline',
+        'transaction_id',
+        'coupon_code',
+        'tax',
     ];
 
     protected function casts(): array
