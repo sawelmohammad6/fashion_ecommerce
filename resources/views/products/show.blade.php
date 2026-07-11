@@ -90,6 +90,30 @@ input[type=number] { -moz-appearance: textfield; }
         </section>
     @endif
 
+    @php
+        $specs = $product->productAttributes->groupBy(fn($pa) => $pa->attribute->name ?? 'General');
+    @endphp
+
+    @if($specs->count() > 0)
+        <section class="mt-16 pt-12 border-t border-gray-200">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Specifications</h2>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <table class="w-full text-sm">
+                    <tbody>
+                        @foreach($specs as $attrName => $items)
+                            <tr class="border-b border-gray-100 last:border-0">
+                                <td class="px-5 py-3.5 font-medium text-gray-700 bg-gray-50/50 w-1/3">{{ $attrName }}</td>
+                                <td class="px-5 py-3.5 text-gray-600">
+                                    {{ $items->pluck('attributeValue.value')->implode(', ') }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    @endif
+
     <section class="mt-16 pt-12 border-t border-gray-200">
         <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
         @php $reviews = $product->reviews()->with('user')->where('status', true)->latest()->get(); @endphp

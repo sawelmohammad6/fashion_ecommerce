@@ -17,26 +17,40 @@ class Product extends Model
         'category_id',
         'name',
         'slug',
+        'brand',
         'description',
+        'full_description',
         'fabric',
         'color',
         'print',
         'size',
         'price',
+        'buying_price',
         'discount_price',
+        'discount_type',
         'stock',
+        'sku',
+        'barcode',
         'image',
         'gallery_images',
+        'video_url',
+        'variations',
         'featured',
         'status',
+        'pre_order',
+        'meta_title',
+        'meta_description',
+        'meta_keywords',
     ];
 
     protected function casts(): array
     {
         return [
             'gallery_images' => 'array',
+            'variations' => 'array',
             'featured' => 'boolean',
             'status' => 'boolean',
+            'pre_order' => 'boolean',
         ];
     }
 
@@ -60,9 +74,27 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
+    public function productAttributes()
+    {
+        return $this->hasMany(ProductAttribute::class);
+    }
+
+    public function attributes()
+    {
+        return $this->belongsToMany(Attribute::class, 'product_attributes')
+            ->withPivot('attribute_value_id')
+            ->withTimestamps();
+    }
+
     public function getFinalPriceAttribute(): float
     {
-        return $this->discount_price ?: $this->price;
+        if ($this->discount_price) {
+            if ($this->discount_type === 'percentage') {
+                return round($this->price - ($this->price * $this->discount_price / 100), 2);
+            }
+            return $this->discount_price;
+        }
+        return $this->price;
     }
 
     public function getAvgRatingAttribute(): float

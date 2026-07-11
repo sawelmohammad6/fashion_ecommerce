@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
+use App\Http\Controllers\Admin\AttributeValueController as AdminAttributeValueController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -100,6 +102,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/{product}/delete-gallery/{index}', [AdminProductController::class, 'deleteGalleryImage'])->name('products.deleteGalleryImage');
+
+    Route::get('/attributes', [AdminAttributeController::class, 'index'])->name('attributes.index');
+    Route::get('/attributes/create', [AdminAttributeController::class, 'create'])->name('attributes.create');
+    Route::post('/attributes', [AdminAttributeController::class, 'store'])->name('attributes.store');
+    Route::get('/attributes/{attribute}/edit', [AdminAttributeController::class, 'edit'])->name('attributes.edit');
+    Route::put('/attributes/{attribute}', [AdminAttributeController::class, 'update'])->name('attributes.update');
+    Route::delete('/attributes/{attribute}', [AdminAttributeController::class, 'destroy'])->name('attributes.destroy');
+
+    Route::post('/attributes/{attribute}/values', [AdminAttributeValueController::class, 'store'])->name('attributes.values.store');
+    Route::put('/attributes/{attribute}/values/{attributeValue}', [AdminAttributeValueController::class, 'update'])->name('attributes.values.update');
+    Route::delete('/attributes/{attribute}/values/{attributeValue}', [AdminAttributeValueController::class, 'destroy'])->name('attributes.values.destroy');
+    Route::get('/attributes/by-category/{category}', [AdminAttributeController::class, 'byCategory'])->name('attributes.by-category');
 
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/export/csv', [AdminOrderController::class, 'exportCsv'])->name('orders.export.csv');
