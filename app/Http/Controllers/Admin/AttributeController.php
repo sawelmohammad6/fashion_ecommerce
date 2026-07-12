@@ -4,16 +4,24 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreAttributeRequest;
-use App\Http\Resources\AttributeResource;
 use App\Models\Attribute;
-use App\Models\Category;
 use Illuminate\Http\Request;
 
 class AttributeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $attributes = Attribute::withCount('values')->latest()->paginate(10);
+        $query = Attribute::withCount('values');
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('slug', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $attributes = $query->latest()->paginate(10)->withQueryString();
+
         return view('admin.attributes.index', compact('attributes'));
     }
 
@@ -26,13 +34,12 @@ class AttributeController extends Controller
     {
         $attribute = Attribute::create($request->validated());
 
-        return redirect()->route('admin.attributes.edit', $attribute)
-            ->with('success', 'Attribute created successfully. You can now add values.');
+        return redirect()->route('admin.attributes.values', $attribute)
+            ->with('success', 'Attribute created. Now add its values.');
     }
 
     public function edit(Attribute $attribute)
     {
-        $attribute->load('values');
         return view('admin.attributes.edit', compact('attribute'));
     }
 
@@ -50,14 +57,5 @@ class AttributeController extends Controller
 
         return redirect()->route('admin.attributes.index')
             ->with('success', 'Attribute deleted successfully.');
-    }
-
-    public function byCategory(Category $category)
-    {
-        $attributes = Attribute::with('values')
-            ->where('status', true)
-            ->get();
-
-        return AttributeResource::collection($attributes);
     }
 }

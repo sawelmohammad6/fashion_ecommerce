@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreProductRequest;
+use App\Models\AttributeValue;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductAttribute;
+use App\Models\ProductAttributeValue;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 
@@ -73,9 +74,7 @@ class ProductController extends Controller
 
         $product = Product::create($data);
 
-        if ($request->filled('attribute_values')) {
-            $this->syncAttributes($product, $request->input('attribute_values'));
-        }
+        $this->syncAttributeValues($product, $request->input('attribute_values', []));
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
@@ -84,7 +83,7 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::active()->get();
-        $product->load('productAttributes');
+        $product->load('productAttributeValues');
 
         return view('admin.products.edit', compact('product', 'categories'));
     }
@@ -109,11 +108,7 @@ class ProductController extends Controller
 
         $product->update($data);
 
-        if ($request->filled('attribute_values')) {
-            $this->syncAttributes($product, $request->input('attribute_values'));
-        } else {
-            $product->productAttributes()->delete();
-        }
+        $this->syncAttributeValues($product, $request->input('attribute_values', []));
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product updated successfully.');
@@ -141,26 +136,30 @@ class ProductController extends Controller
         return back()->with('success', 'Gallery image removed.');
     }
 
-    protected function syncAttributes(Product $product, array $attributeValueIds): void
+    protected function syncAttributeValues(Product $product, array $attributeValueIds): void
     {
-        $product->productAttributes()->delete();
+        $product->productAttributeValues()->delete();
+
+        if (empty($attributeValueIds)) {
+            return;
+        }
+
+        $values = AttributeValue::with('attribute')
+            ->whereIn('id', $attributeValueIds)
+            ->whereHas('attribute', fn ($q) => $q->where('status', true))
+            ->get();
 
         $rows = [];
-        foreach ($attributeValueIds as $valueId) {
-            $value = \App\Models\AttributeValue::find($valueId);
-            if ($value) {
-                $rows[] = [
-                    'product_id' => $product->id,
-                    'attribute_id' => $value->attribute_id,
-                    'attribute_value_id' => $value->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            }
+        foreach ($values as $value) {
+            $rows[] = [
+                'product_id' => $product->id,
+                'attribute_id' => $value->attribute_id,
+                'attribute_value_id' => $value->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
         }
 
-        if (!empty($rows)) {
-            ProductAttribute::insert($rows);
-        }
+        ProductAttributeValue::insert($rows);
     }
 }

@@ -74,15 +74,15 @@ class Product extends Model
         return $this->hasMany(Review::class);
     }
 
-    public function productAttributes()
+    public function productAttributeValues()
     {
-        return $this->hasMany(ProductAttribute::class);
+        return $this->hasMany(ProductAttributeValue::class);
     }
 
-    public function attributes()
+    public function attributeValues()
     {
-        return $this->belongsToMany(Attribute::class, 'product_attributes')
-            ->withPivot('attribute_value_id')
+        return $this->belongsToMany(AttributeValue::class, 'product_attribute_values', 'product_id', 'attribute_value_id')
+            ->withPivot('attribute_id')
             ->withTimestamps();
     }
 

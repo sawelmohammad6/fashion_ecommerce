@@ -2,7 +2,7 @@
 @section('title', 'Edit Product')
 @push('styles')
 <style>
-    .variation-row:last-child .remove-variation { display: inline-flex; }
+    .img-preview { transition: opacity 0.3s ease; }
 </style>
 @endpush
 @section('content')
@@ -85,7 +85,50 @@
             </div>
         </div>
 
-        {{-- Section 2: Pricing --}}
+        {{-- Section 2: Product Attributes --}}
+        <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-5">
+            <div class="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800/50">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-base font-semibold text-white">Product Attributes</h2>
+                    <p class="text-xs text-gray-500">Select attribute values for this product</p>
+                </div>
+            </div>
+            <div id="attributesContainer">
+                @php
+                    $activeAttributes = \App\Models\Attribute::with('values')->where('status', true)->get();
+                    $selectedValues = old('attribute_values', $product->productAttributeValues->pluck('attribute_value_id')->toArray());
+                @endphp
+                @if($activeAttributes->count() > 0)
+                    @foreach($activeAttributes as $attr)
+                        @if($attr->values->count() > 0)
+                            <div class="mb-4 pb-4 border-b border-gray-800/30 last:border-0 last:mb-0 last:pb-0">
+                                <p class="text-sm font-medium text-gray-300 mb-2.5">{{ $attr->name }}</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($attr->values as $val)
+                                        @php $isSel = in_array($val->id, $selectedValues); @endphp
+                                        <button type="button"
+                                                onclick="toggleAttr(this, {{ $val->id }})"
+                                                class="attr-value px-3 py-1.5 rounded-lg text-sm font-medium border transition-all duration-200
+                                                       {{ $isSel ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50' : 'bg-gray-800/40 text-gray-400 border-gray-700/50 hover:border-emerald-500/30' }}">
+                                            {{ $val->value }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                @else
+                    <p class="text-sm text-gray-500">No attributes available. <a href="{{ route('admin.attributes.index') }}" class="text-emerald-400 hover:text-emerald-300">Create attributes</a> first.</p>
+                @endif
+            </div>
+            <div id="selectedAttributeValues"></div>
+        </div>
+
+        {{-- Section 3: Pricing --}}
+        @php $currencySymbol = getCurrencySymbol(); @endphp
         <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-5">
             <div class="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800/50">
                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -100,18 +143,18 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Buying Price (Cost)</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                    <div class="flex rounded-lg border border-gray-700/50 focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/20 transition @error('buying_price') border-red-500/50 @enderror">
+                        <span class="inline-flex items-center px-3 bg-gray-800/50 text-gray-500 text-sm border-r border-gray-700/50 min-w-10 justify-center">{{ $currencySymbol }}</span>
                         <input type="number" step="0.01" min="0" name="buying_price" value="{{ old('buying_price', $product->buying_price) }}"
-                               class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg pl-7 pr-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+                               class="flex-1 min-w-0 bg-gray-800/50 px-3 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none">
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Regular Price <span class="text-red-400">*</span></label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                    <div class="flex rounded-lg border border-gray-700/50 focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/20 transition @error('price') border-red-500/50 @enderror">
+                        <span class="inline-flex items-center px-3 bg-gray-800/50 text-gray-500 text-sm border-r border-gray-700/50 min-w-10 justify-center">{{ $currencySymbol }}</span>
                         <input type="number" step="0.01" min="0" name="price" id="regularPrice" value="{{ old('price', $product->price) }}"
-                               class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg pl-7 pr-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition @error('price') border-red-500/50 @enderror"
+                               class="flex-1 min-w-0 bg-gray-800/50 px-3 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none"
                                oninput="calculateFinalPrice()">
                     </div>
                     @error('price') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
@@ -124,7 +167,7 @@
                     <select name="discount_type" id="discountType" onchange="calculateFinalPrice()"
                             class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
                         <option value="" class="bg-gray-900">No Discount</option>
-                        <option value="fixed" {{ old('discount_type', $product->discount_type) === 'fixed' ? 'selected' : '' }} class="bg-gray-900">Fixed ($)</option>
+                        <option value="fixed" {{ old('discount_type', $product->discount_type) === 'fixed' ? 'selected' : '' }} class="bg-gray-900">Fixed ({{ $currencySymbol }})</option>
                         <option value="percentage" {{ old('discount_type', $product->discount_type) === 'percentage' ? 'selected' : '' }} class="bg-gray-900">Percentage (%)</option>
                     </select>
                 </div>
@@ -137,16 +180,16 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Final Selling Price</label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                    <div class="flex rounded-lg border border-gray-700/30 focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/20 transition">
+                        <span class="inline-flex items-center px-3 bg-gray-800/30 text-gray-500 text-sm border-r border-gray-700/30 min-w-10 justify-center">{{ $currencySymbol }}</span>
                         <input type="text" id="finalPrice" readonly
-                               class="w-full bg-gray-800/30 border border-gray-700/30 rounded-lg pl-7 pr-4 py-2.5 text-sm text-emerald-400 font-semibold outline-none cursor-default">
+                               class="flex-1 min-w-0 bg-gray-800/30 px-3 py-2.5 text-sm text-emerald-400 font-semibold outline-none cursor-default">
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Section 3: Media --}}
+        {{-- Section 4: Media --}}
         <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-5">
             <div class="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800/50">
                 <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -213,142 +256,6 @@
                        class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition @error('video_url') border-red-500/50 @enderror">
                 @error('video_url') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
-        </div>
-
-        {{-- Section 4: Product Variations --}}
-        <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-5">
-            <div class="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800/50">
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                </div>
-                <div>
-                    <h2 class="text-base font-semibold text-white">Product Variations</h2>
-                    <p class="text-xs text-gray-500">Add size, color, and other variant options</p>
-                </div>
-            </div>
-
-            <div id="variationsContainer">
-                @php $variations = old('variations', $product->variations ?? []); @endphp
-                @forelse($variations as $i => $variation)
-                    <div class="variation-card bg-gray-900/30 border border-gray-700/50 rounded-xl p-4 mb-3">
-                        <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-800/50">
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="toggleVariation(this)" class="p-1 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition">
-                                    <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
-                                <span class="text-sm font-semibold text-gray-300 variation-title">Variation #{{ $loop->iteration }}</span>
-                            </div>
-                            <button type="button" onclick="removeVariation(this)" class="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition" title="Remove">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </div>
-                        <div class="variation-body">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Size</label>
-                                    <input type="text" name="variations[{{ $i }}][size]" value="{{ $variation['size'] ?? '' }}" placeholder="S, M, L"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Color</label>
-                                    <input type="text" name="variations[{{ $i }}][color]" value="{{ $variation['color'] ?? '' }}" placeholder="Red, Blue"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Fabric</label>
-                                    <input type="text" name="variations[{{ $i }}][fabric]" value="{{ $variation['fabric'] ?? '' }}" placeholder="Cotton"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Print</label>
-                                    <input type="text" name="variations[{{ $i }}][print]" value="{{ $variation['print'] ?? '' }}" placeholder="Solid"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">SKU</label>
-                                    <input type="text" name="variations[{{ $i }}][sku]" value="{{ $variation['sku'] ?? '' }}" placeholder="SKU-001"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Extra Price</label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">$</span>
-                                        <input type="number" step="0.01" min="0" name="variations[{{ $i }}][extra_price]" value="{{ $variation['extra_price'] ?? '' }}" placeholder="0.00"
-                                               class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg pl-7 pr-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Stock</label>
-                                    <input type="number" min="0" name="variations[{{ $i }}][stock]" value="{{ $variation['stock'] ?? '' }}" placeholder="0"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @empty
-                    <div class="variation-card bg-gray-900/30 border border-gray-700/50 rounded-xl p-4 mb-3">
-                        <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-800/50">
-                            <div class="flex items-center gap-2">
-                                <button type="button" onclick="toggleVariation(this)" class="p-1 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition">
-                                    <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                                </button>
-                                <span class="text-sm font-semibold text-gray-300 variation-title">Variation #1</span>
-                            </div>
-                            <button type="button" onclick="removeVariation(this)" class="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition" title="Remove">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                            </button>
-                        </div>
-                        <div class="variation-body">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Size</label>
-                                    <input type="text" name="variations[0][size]" placeholder="S, M, L"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Color</label>
-                                    <input type="text" name="variations[0][color]" placeholder="Red, Blue"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Fabric</label>
-                                    <input type="text" name="variations[0][fabric]" placeholder="Cotton"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Print</label>
-                                    <input type="text" name="variations[0][print]" placeholder="Solid"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">SKU</label>
-                                    <input type="text" name="variations[0][sku]" placeholder="SKU-001"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Extra Price</label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">$</span>
-                                        <input type="number" step="0.01" min="0" name="variations[0][extra_price]" placeholder="0.00"
-                                               class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg pl-7 pr-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label class="block text-xs font-medium text-gray-500 mb-1">Stock</label>
-                                    <input type="number" min="0" name="variations[0][stock]" placeholder="0"
-                                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                @endforelse
-            </div>
-
-            <button type="button" onclick="addVariation()"
-                    class="mt-2 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Add Variation
-            </button>
         </div>
 
         {{-- Section 5: Inventory --}}
@@ -448,23 +355,7 @@
             </div>
         </div>
 
-        {{-- Section 8: Product Attributes --}}
-        <div class="bg-gray-900/50 border border-gray-800 rounded-xl p-6 mb-5">
-            <div class="flex items-center gap-3 mb-5 pb-4 border-b border-gray-800/50">
-                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                </div>
-                <div>
-                    <h2 class="text-base font-semibold text-white">Product Attributes</h2>
-                    <p class="text-xs text-gray-500">Select attribute values for this product</p>
-                </div>
-            </div>
-            <div id="attributesContainer">
-                <p class="text-sm text-gray-500">Select a category first to load available attributes.</p>
-            </div>
-        </div>
-
-        {{-- Section 9: Actions --}}
+        {{-- Section 8: Actions --}}
         <div class="flex items-center gap-3 pt-2">
             <button type="submit" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition">Update Product</button>
             <a href="{{ route('admin.products.index') }}" class="px-5 py-2.5 text-sm font-semibold rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Cancel</a>
@@ -495,7 +386,8 @@
         let final = price;
         if (discountType === 'fixed') final = price - discountValue;
         else if (discountType === 'percentage') final = price - (price * discountValue / 100);
-        document.getElementById('finalPrice').value = Math.max(0, final).toFixed(2);
+        const num = Math.max(0, final);
+        document.getElementById('finalPrice').value = num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
     function previewThumbnail(input) {
@@ -533,131 +425,36 @@
         }
     }
 
-    function toggleVariation(btn) {
-        const body = btn.closest('.variation-card').querySelector('.variation-body');
-        body.classList.toggle('hidden');
-        btn.querySelector('svg').classList.toggle('rotate-180');
-    }
+        calculateFinalPrice();
 
-    function addVariation() {
-        const container = document.getElementById('variationsContainer');
-        const idx = container.querySelectorAll('.variation-card').length;
-        const num = idx + 1;
-        container.insertAdjacentHTML('beforeend',
-            `<div class="variation-card bg-gray-900/30 border border-gray-700/50 rounded-xl p-4 mb-3">
-                <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-800/50">
-                    <div class="flex items-center gap-2">
-                        <button type="button" onclick="toggleVariation(this)" class="p-1 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition">
-                            <svg class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                        </button>
-                        <span class="text-sm font-semibold text-gray-300 variation-title">Variation #${num}</span>
-                    </div>
-                    <button type="button" onclick="removeVariation(this)" class="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition" title="Remove">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                </div>
-                <div class="variation-body">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Size</label>
-                            <input type="text" name="variations[${idx}][size]" placeholder="S, M, L" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Color</label>
-                            <input type="text" name="variations[${idx}][color]" placeholder="Red, Blue" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Fabric</label>
-                            <input type="text" name="variations[${idx}][fabric]" placeholder="Cotton" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Print</label>
-                            <input type="text" name="variations[${idx}][print]" placeholder="Solid" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">SKU</label>
-                            <input type="text" name="variations[${idx}][sku]" placeholder="SKU-001" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Extra Price</label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm">$</span>
-                                <input type="number" step="0.01" min="0" name="variations[${idx}][extra_price]" placeholder="0.00" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg pl-7 pr-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                            </div>
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Stock</label>
-                            <input type="number" min="0" name="variations[${idx}][stock]" placeholder="0" class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
-                        </div>
-                    </div>
-                </div>
-            </div>`
-        );
-    }
+        let selectedAttrs = @json($selectedValues);
+        syncAttrInputs();
 
-    function removeVariation(btn) {
-        const card = btn.closest('.variation-card');
-        card.remove();
-        document.querySelectorAll('#variationsContainer .variation-card').forEach((el, i) => {
-            el.querySelector('.variation-title').textContent = 'Variation #' + (i + 1);
-        });
-    }
-
-    calculateFinalPrice();
-
-    const categorySelect = document.querySelector('select[name="category_id"]');
-    const attributesContainer = document.getElementById('attributesContainer');
-    const existingValues = @json($product->productAttributes->pluck('attribute_value_id')->toArray());
-
-    if (categorySelect) {
-        categorySelect.addEventListener('change', function() {
-            loadAttributes(this.value);
-        });
-        if (categorySelect.value) {
-            loadAttributes(categorySelect.value);
-        }
-    }
-
-    function loadAttributes(categoryId) {
-        if (!categoryId) {
-            attributesContainer.innerHTML = '<p class="text-sm text-gray-500">Select a category first to load available attributes.</p>';
-            return;
+        function toggleAttr(btn, valueId) {
+            const idx = selectedAttrs.indexOf(valueId);
+            if (idx > -1) {
+                selectedAttrs.splice(idx, 1);
+                btn.classList.remove('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/50');
+                btn.classList.add('bg-gray-800/40', 'text-gray-400', 'border-gray-700/50', 'hover:border-emerald-500/30');
+            } else {
+                selectedAttrs.push(valueId);
+                btn.classList.remove('bg-gray-800/40', 'text-gray-400', 'border-gray-700/50', 'hover:border-emerald-500/30');
+                btn.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/50');
+            }
+            syncAttrInputs();
         }
 
-        attributesContainer.innerHTML = '<p class="text-sm text-gray-500">Loading attributes...</p>';
-
-        fetch('{{ route("admin.attributes.by-category", "__CAT__") }}'.replace('__CAT__', categoryId))
-            .then(res => res.json())
-            .then(data => {
-                if (!data.data || data.data.length === 0) {
-                    attributesContainer.innerHTML = '<p class="text-sm text-gray-500">No attributes defined.</p>';
-                    return;
-                }
-
-                let html = '';
-                data.data.forEach(attr => {
-                    if (!attr.values || attr.values.length === 0) return;
-
-                    html += `<div class="mb-4 pb-4 border-b border-gray-800/30 last:border-0 last:mb-0 last:pb-0">`;
-                    html += `<p class="text-sm font-medium text-gray-300 mb-2.5">${attr.name}</p>`;
-                    html += `<div class="flex flex-wrap gap-2">`;
-
-                    attr.values.forEach(val => {
-                        const checked = existingValues.includes(val.id) ? 'checked' : '';
-                        html += `<label class="relative flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-800/40 border border-gray-700/50 cursor-pointer hover:border-emerald-500/30 transition has-[:checked]:bg-emerald-500/10 has-[:checked]:border-emerald-500/50 has-[:checked]:text-emerald-400">`;
-                        html += `<input type="checkbox" name="attribute_values[]" value="${val.id}" class="sr-only peer" ${checked}>`;
-                        html += `<span class="text-sm text-gray-400 peer-checked:text-emerald-400">${val.value}</span>`;
-                        html += `</label>`;
-                    });
-
-                    html += `</div></div>`;
-                });
-
-                attributesContainer.innerHTML = html || '<p class="text-sm text-gray-500">No attribute values defined.</p>';
-            })
-            .catch(() => {
-                attributesContainer.innerHTML = '<p class="text-sm text-red-400">Failed to load attributes.</p>';
+        function syncAttrInputs() {
+            const container = document.getElementById('selectedAttributeValues');
+            if (!container) return;
+            container.innerHTML = '';
+            selectedAttrs.forEach(function(id) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'attribute_values[]';
+                input.value = id;
+                container.appendChild(input);
             });
-    }
-</script>
+        }
+    </script>
 @endpush

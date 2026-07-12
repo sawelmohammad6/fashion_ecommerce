@@ -12,6 +12,19 @@
     </a>
 </div>
 
+<form method="GET" class="mb-6">
+    <div class="flex gap-3">
+        <div class="relative flex-1 max-w-sm">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search attributes..." class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg pl-9 pr-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+        </div>
+        <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Search</button>
+        @if(request('search'))
+            <a href="{{ route('admin.attributes.index') }}" class="px-4 py-2.5 text-sm font-medium rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition">Clear</a>
+        @endif
+    </div>
+</form>
+
 <div class="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden shadow-sm">
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -49,9 +62,14 @@
                         </td>
                         <td class="px-4 py-3 text-right">
                             <div class="flex items-center justify-end gap-1.5">
-                                <a href="{{ route('admin.attributes.edit', $attr) }}"
+                                <a href="{{ route('admin.attributes.values', $attr) }}"
                                    class="p-2 rounded-lg text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition"
                                    title="Manage Values">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                </a>
+                                <a href="{{ route('admin.attributes.edit', $attr) }}"
+                                   class="p-2 rounded-lg text-gray-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition"
+                                   title="Edit">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </a>
                                 <form action="{{ route('admin.attributes.destroy', $attr) }}" method="POST" onsubmit="return confirm('Delete this attribute? All values will be removed.')" class="inline">
@@ -69,8 +87,13 @@
                     <tr>
                         <td colspan="6" class="px-4 py-12 text-center text-gray-500">
                             <svg class="w-10 h-10 mx-auto mb-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                            <p class="text-sm">No attributes found.</p>
-                            <a href="{{ route('admin.attributes.create') }}" class="text-emerald-400 hover:text-emerald-300 text-sm mt-1 inline-block">Create your first attribute</a>
+                            @if(request('search'))
+                                <p class="text-sm">No attributes match your search.</p>
+                                <a href="{{ route('admin.attributes.index') }}" class="text-emerald-400 hover:text-emerald-300 text-sm mt-1 inline-block">Clear search</a>
+                            @else
+                                <p class="text-sm">No attributes found.</p>
+                                <a href="{{ route('admin.attributes.create') }}" class="text-emerald-400 hover:text-emerald-300 text-sm mt-1 inline-block">Create your first attribute</a>
+                            @endif
                         </td>
                     </tr>
                 @endforelse

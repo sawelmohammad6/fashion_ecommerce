@@ -110,10 +110,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::put('/attributes/{attribute}', [AdminAttributeController::class, 'update'])->name('attributes.update');
     Route::delete('/attributes/{attribute}', [AdminAttributeController::class, 'destroy'])->name('attributes.destroy');
 
+    Route::get('/attributes/{attribute}/values', [AdminAttributeValueController::class, 'index'])->name('attributes.values');
     Route::post('/attributes/{attribute}/values', [AdminAttributeValueController::class, 'store'])->name('attributes.values.store');
     Route::put('/attributes/{attribute}/values/{attributeValue}', [AdminAttributeValueController::class, 'update'])->name('attributes.values.update');
     Route::delete('/attributes/{attribute}/values/{attributeValue}', [AdminAttributeValueController::class, 'destroy'])->name('attributes.values.destroy');
-    Route::get('/attributes/by-category/{category}', [AdminAttributeController::class, 'byCategory'])->name('attributes.by-category');
+    Route::post('/attributes/{attribute}/values/sort-order', [AdminAttributeValueController::class, 'updateSortOrder'])->name('attributes.values.sort-order');
 
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/export/csv', [AdminOrderController::class, 'exportCsv'])->name('orders.export.csv');

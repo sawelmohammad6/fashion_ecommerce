@@ -91,7 +91,7 @@ input[type=number] { -moz-appearance: textfield; }
     @endif
 
     @php
-        $specs = $product->productAttributes->groupBy(fn($pa) => $pa->attribute->name ?? 'General');
+        $specs = $product->productAttributeValues->groupBy(fn($pav) => $pav->attribute->name ?? 'General');
     @endphp
 
     @if($specs->count() > 0)

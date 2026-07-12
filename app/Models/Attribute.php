@@ -17,11 +17,6 @@ class Attribute extends Model
 
     public function values()
     {
-        return $this->hasMany(AttributeValue::class);
-    }
-
-    public function productAttributes()
-    {
-        return $this->hasMany(ProductAttribute::class);
+        return $this->hasMany(AttributeValue::class)->orderBy('sort_order');
     }
 }

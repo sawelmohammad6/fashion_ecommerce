@@ -20,6 +20,7 @@ class StoreAttributeValueRequest extends FormRequest
         return [
             'value' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255', Rule::unique('attribute_values', 'slug')->where(fn ($q) => $q->where('attribute_id', $attributeId))->ignore($valueId)],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }
