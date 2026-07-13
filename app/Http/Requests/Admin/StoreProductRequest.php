@@ -37,6 +37,7 @@ class StoreProductRequest extends FormRequest
             }],
             'discount_type' => ['nullable', 'string', 'in:fixed,percentage'],
             'stock' => ['required', 'integer', 'min:0'],
+            'low_stock_alert_quantity' => ['nullable', 'integer', 'min:1'],
             'sku' => ['nullable', 'string', 'max:255'],
             'barcode' => ['nullable', 'string', 'max:255'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],

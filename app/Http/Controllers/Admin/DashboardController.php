@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\InventoryTransaction;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -15,34 +16,31 @@ class DashboardController extends Controller
 {
     public function index(InventoryService $inventory, OrderService $orderService)
     {
-        $totalProducts = Product::count();
+        $totalProducts  = Product::count();
         $totalCategories = Category::count();
-        $totalOrders = Order::count();
-        $pendingOrders = Order::where('status', 'pending')->count();
-        $deliveredOrders = Order::where('status', 'delivered')->count();
-        $cancelledOrders = Order::where('status', 'cancelled')->count();
+        $totalOrders    = Order::count();
         $totalCustomers = User::where('is_admin', false)->count();
-        $revenue = $orderService->getRevenue();
-        $todayRevenue = Order::where('status', 'delivered')
-            ->where('payment_status', 'paid')
-            ->whereDate('ordered_at', today())
-            ->sum('grand_total');
-        $lowStockCount = $inventory->getLowStockCount();
-        $lowStockProducts = $inventory->getLowStockProducts(5, 10);
-        $recentOrders = Order::with('user')->latest()->limit(8)->get();
-        $latestCustomers = User::where('is_admin', false)->latest()->limit(8)->get();
+        $revenue        = $orderService->getRevenue();
+        $lowStockCount  = $inventory->getLowStockCount();
+        $lowStockProducts = $inventory->getLowStockProducts(10);
+        $recentOrders   = Order::with('user')->latest()->limit(10)->get();
+        $latestProducts = Product::with('category')->latest()->limit(10)->get();
 
-        $topProducts = $inventory->getTopSellingProducts(5);
-        $latestProducts = Product::latest()->limit(5)->get();
-        $orderTotals = $orderService->getOrderTotalsByStatus();
+        // Inventory stats
+        $totalStockQty = Product::sum('stock');
+        $outOfStockCount = Product::where('stock', 0)->count();
+        $stockValue = Product::selectRaw('SUM(stock * COALESCE(buying_price, 0)) as value')->value('value');
+        $todayStockIn = InventoryTransaction::where('type', 'in')->whereDate('date', today())->sum('quantity');
+        $todayStockOut = InventoryTransaction::where('type', 'out')->whereDate('date', today())->sum('quantity');
+
+        $currencySymbol = getCurrencySymbol();
 
         $months = collect();
         $monthlyRevenue = collect();
         for ($i = 11; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $months->push($date->format('M Y'));
-            $monthlyRevenue->push(Order::where('status', 'delivered')
-                ->where('payment_status', 'paid')
+            $monthlyRevenue->push(Order::whereIn('status', ['delivered', 'completed'])
                 ->whereYear('ordered_at', $date->year)
                 ->whereMonth('ordered_at', $date->month)
                 ->sum('grand_total'));
@@ -53,19 +51,18 @@ class DashboardController extends Controller
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
             $weekLabels->push($date->format('D'));
-            $weeklySales->push(Order::where('status', 'delivered')
+            $weeklySales->push(Order::whereIn('status', ['delivered', 'completed'])
                 ->whereDate('ordered_at', $date)
                 ->sum('grand_total'));
         }
 
-        return view('admin.dashboard.index', compact(
+        return view('admin.dashboard', compact(
             'totalProducts', 'totalCategories', 'totalOrders',
-            'pendingOrders', 'deliveredOrders', 'cancelledOrders',
-            'totalCustomers', 'revenue', 'todayRevenue',
-            'lowStockCount', 'lowStockProducts',
-            'recentOrders', 'latestCustomers',
-            'topProducts', 'latestProducts', 'orderTotals',
-            'months', 'monthlyRevenue', 'weekLabels', 'weeklySales'
+            'totalCustomers', 'revenue', 'lowStockCount',
+            'lowStockProducts', 'recentOrders', 'latestProducts',
+            'months', 'monthlyRevenue', 'weekLabels', 'weeklySales',
+            'currencySymbol', 'totalStockQty', 'outOfStockCount',
+            'stockValue', 'todayStockIn', 'todayStockOut'
         ));
     }
 }

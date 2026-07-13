@@ -270,12 +270,18 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">Stock <span class="text-red-400">*</span></label>
                     <input type="number" min="0" name="stock" value="{{ old('stock', $product->stock) }}"
                            class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition @error('stock') border-red-500/50 @enderror">
                     @error('stock') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1.5">Alert Qty</label>
+                    <input type="number" min="1" name="low_stock_alert_quantity" value="{{ old('low_stock_alert_quantity', $product->low_stock_alert_quantity) }}" placeholder="e.g. 5"
+                           class="w-full bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-2.5 text-sm text-gray-300 placeholder-gray-500 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition">
+                    <p class="text-xs text-gray-600 mt-1">Low stock threshold</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-400 mb-1.5">SKU</label>

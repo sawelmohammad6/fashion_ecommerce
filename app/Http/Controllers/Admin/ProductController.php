@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ProductAttributeValue;
 use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -26,8 +27,10 @@ class ProductController extends Controller
 
         if ($search = $request->get('search')) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('slug', 'LIKE', "%{$search}%");
+                $q->where('products.name', 'LIKE', "%{$search}%")
+                  ->orWhere('products.slug', 'LIKE', "%{$search}%")
+                  ->orWhere('products.sku', 'LIKE', "%{$search}%")
+                  ->orWhereHas('category', fn($c) => $c->where('name', 'LIKE', "%{$search}%"));
             });
         }
 
@@ -36,14 +39,22 @@ class ProductController extends Controller
         }
 
         if ($stockFilter = $request->get('stock')) {
-            if ($stockFilter === 'low') {
+            if ($stockFilter === 'in') {
+                $query->inStock();
+            } elseif ($stockFilter === 'low') {
                 $query->lowStock();
             } elseif ($stockFilter === 'out') {
                 $query->outOfStock();
             }
         }
 
-        $products = $query->latest()->paginate(15)->withQueryString();
+        if ($sort = $request->get('sort')) {
+            $query->matchSort($sort);
+        } else {
+            $query->latest();
+        }
+
+        $products = $query->paginate(15)->withQueryString();
         $categories = Category::active()->get();
 
         return view('admin.products.index', compact('products', 'categories'));
@@ -78,6 +89,17 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
+    }
+
+    public function show(Product $product)
+    {
+        $product->load([
+            'category',
+            'productAttributeValues.attribute',
+            'productAttributeValues.attributeValue',
+        ]);
+
+        return view('admin.products.show', compact('product'));
     }
 
     public function edit(Product $product)
@@ -134,6 +156,29 @@ class ProductController extends Controller
         }
 
         return back()->with('success', 'Gallery image removed.');
+    }
+
+    public function bulkUpdateStock(Request $request)
+    {
+        $data = $request->validate([
+            'product_ids' => ['required', 'array', 'min:1'],
+            'product_ids.*' => ['integer', 'exists:products,id'],
+            'stock_value' => ['required', 'integer', 'min:0'],
+        ]);
+
+        $updated = Product::whereIn('id', $data['product_ids'])
+            ->update(['stock' => $data['stock_value']]);
+
+        $lowStockCount = Product::whereIn('id', $data['product_ids'])
+            ->lowStock()->count();
+
+        $message = "{$updated} product(s) updated to {$data['stock_value']} stock.";
+        if ($lowStockCount > 0) {
+            $message .= " {$lowStockCount} product(s) still low stock.";
+        }
+
+        return redirect()->route('admin.products.index')
+            ->with('success', $message);
     }
 
     protected function syncAttributeValues(Product $product, array $attributeValueIds): void

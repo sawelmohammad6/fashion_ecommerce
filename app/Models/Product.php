@@ -29,6 +29,7 @@ class Product extends Model
         'discount_price',
         'discount_type',
         'stock',
+        'low_stock_alert_quantity',
         'sku',
         'barcode',
         'image',
@@ -126,9 +127,32 @@ class Product extends Model
         return $query->where('status', true);
     }
 
-    public function scopeLowStock($query, int $threshold = 5)
+    public function scopeLowStock($query)
     {
-        return $query->where('stock', '>', 0)->where('stock', '<=', $threshold);
+        return $query->where('stock', '>', 0)
+            ->where(function ($q) {
+                $q->whereNotNull('low_stock_alert_quantity')
+                  ->whereColumn('stock', '<=', 'low_stock_alert_quantity')
+                  ->orWhere(function ($q2) {
+                      $q2->whereNull('low_stock_alert_quantity')
+                         ->where('stock', '<=', 5);
+                  });
+            });
+    }
+
+    public function scopeInStock($query)
+    {
+        return $query->where(function ($q) {
+            $q->where('stock', '>', 0)
+              ->where(function ($q2) {
+                  $q2->whereNotNull('low_stock_alert_quantity')
+                     ->whereColumn('stock', '>', 'low_stock_alert_quantity')
+                     ->orWhere(function ($q3) {
+                         $q3->whereNull('low_stock_alert_quantity')
+                            ->where('stock', '>', 5);
+                     });
+              });
+        });
     }
 
     public function scopeOutOfStock($query)
@@ -143,8 +167,30 @@ class Product extends Model
             'price_desc' => $query->orderByDesc('price'),
             'name_asc' => $query->orderBy('name'),
             'name_desc' => $query->orderByDesc('name'),
+            'stock_asc' => $query->orderBy('stock'),
+            'stock_desc' => $query->orderByDesc('stock'),
             'oldest' => $query->oldest(),
             default => $query->latest(),
         };
+    }
+
+    public function getStockStatusAttribute(): string
+    {
+        if ($this->stock <= 0) {
+            return 'out_of_stock';
+        }
+
+        $threshold = $this->low_stock_alert_quantity ?? 5;
+
+        if ($this->stock <= $threshold) {
+            return 'low_stock';
+        }
+
+        return 'in_stock';
+    }
+
+    public function getIsLowStockAttribute(): bool
+    {
+        return $this->stock_status === 'low_stock';
     }
 }

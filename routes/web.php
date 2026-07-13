@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CurrencySettingController as AdminCurrencySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\AttributeController as AdminAttributeController;
@@ -85,7 +86,7 @@ Route::middleware('auth')->group(function () {
 // Admin Routes
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.dashboard'));
-    Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/categories', [AdminCategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [AdminCategoryController::class, 'create'])->name('categories.create');
@@ -98,10 +99,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/products', [AdminProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [AdminProductController::class, 'create'])->name('products.create');
     Route::post('/products', [AdminProductController::class, 'store'])->name('products.store');
+    Route::get('/products/{product}', [AdminProductController::class, 'show'])->name('products.show');
     Route::get('/products/{product}/edit', [AdminProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/{product}', [AdminProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [AdminProductController::class, 'destroy'])->name('products.destroy');
     Route::get('/products/{product}/delete-gallery/{index}', [AdminProductController::class, 'deleteGalleryImage'])->name('products.deleteGalleryImage');
+    Route::post('/products/bulk-update-stock', [AdminProductController::class, 'bulkUpdateStock'])->name('products.bulk-update-stock');
+
+    Route::get('/inventory', [AdminInventoryController::class, 'index'])->name('inventory.index');
+    Route::get('/inventory/stock-in', [AdminInventoryController::class, 'stockInForm'])->name('inventory.stock-in');
+    Route::post('/inventory/stock-in', [AdminInventoryController::class, 'stockIn'])->name('inventory.stock-in.store');
+    Route::get('/inventory/stock-out', [AdminInventoryController::class, 'stockOutForm'])->name('inventory.stock-out');
+    Route::post('/inventory/stock-out', [AdminInventoryController::class, 'stockOut'])->name('inventory.stock-out.store');
+    Route::get('/inventory/adjust', [AdminInventoryController::class, 'adjustForm'])->name('inventory.adjust');
+    Route::post('/inventory/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust.store');
+    Route::get('/inventory/history', [AdminInventoryController::class, 'history'])->name('inventory.history');
+    Route::get('/inventory/export/csv', [AdminInventoryController::class, 'exportCsv'])->name('inventory.export.csv');
 
     Route::get('/attributes', [AdminAttributeController::class, 'index'])->name('attributes.index');
     Route::get('/attributes/create', [AdminAttributeController::class, 'create'])->name('attributes.create');

@@ -6,9 +6,9 @@ use App\Models\Product;
 
 class InventoryService
 {
-    public function getLowStockCount(int $threshold = 5): int
+    public function getLowStockCount(): int
     {
-        return Product::lowStock($threshold)->count();
+        return Product::lowStock()->count();
     }
 
     public function getOutOfStockCount(): int
@@ -16,10 +16,10 @@ class InventoryService
         return Product::outOfStock()->count();
     }
 
-    public function getLowStockProducts(int $threshold = 5, int $limit = 10)
+    public function getLowStockProducts(int $limit = 10)
     {
         return Product::with('category')
-            ->lowStock($threshold)
+            ->lowStock()
             ->orderBy('stock')
             ->limit($limit)
             ->get();
