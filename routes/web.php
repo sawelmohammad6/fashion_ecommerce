@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CouponController as AdminCouponController;
 use App\Http\Controllers\Admin\CurrencySettingController as AdminCurrencySettingController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
@@ -115,6 +116,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::post('/inventory/adjust', [AdminInventoryController::class, 'adjust'])->name('inventory.adjust.store');
     Route::get('/inventory/history', [AdminInventoryController::class, 'history'])->name('inventory.history');
     Route::get('/inventory/export/csv', [AdminInventoryController::class, 'exportCsv'])->name('inventory.export.csv');
+
+    Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/activity-logs/export/csv', [AdminActivityLogController::class, 'exportCsv'])->name('activity-logs.export.csv');
 
     Route::get('/attributes', [AdminAttributeController::class, 'index'])->name('attributes.index');
     Route::get('/attributes/create', [AdminAttributeController::class, 'create'])->name('attributes.create');

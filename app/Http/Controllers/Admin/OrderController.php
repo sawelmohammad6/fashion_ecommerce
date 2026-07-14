@@ -115,6 +115,9 @@ class OrderController extends Controller
 
         $order->refresh();
 
+        $orderId = $order->invoice_no ?? $order->id;
+        logActivity('Updated', 'Order', "Order #{$orderId} was updated.");
+
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Order updated successfully.');
     }
@@ -236,6 +239,9 @@ class OrderController extends Controller
         ]);
 
         $this->orderService->updateStatus($order, $request->status);
+
+        $orderId = $order->invoice_no ?? $order->id;
+        logActivity('Status Changed', 'Order', "Order #{$orderId} status changed to {$request->status}.");
 
         return response()->json([
             'success'   => true,

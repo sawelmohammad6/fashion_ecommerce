@@ -56,6 +56,8 @@ class CurrencySettingController extends Controller
 
         cache()->forget('active_currency');
 
+        logActivity('Changed', 'Currency', "Currency '{$currencySetting->currency_name}' was updated.");
+
         return redirect()->route('admin.currency-settings.index')
             ->with('success', 'Currency updated successfully.');
     }
@@ -81,6 +83,9 @@ class CurrencySettingController extends Controller
         $currencySetting->save();
 
         cache()->forget('active_currency');
+
+        $action = $currencySetting->status ? 'activated' : 'deactivated';
+        logActivity('Changed', 'Currency', "Currency '{$currencySetting->currency_name}' was {$action}.");
 
         $message = $currencySetting->status ? 'Currency activated.' : 'Currency deactivated.';
 

@@ -115,6 +115,8 @@ class CustomerController extends Controller
 
         $customer->update($validated);
 
+        logActivity('Updated', 'Customer', "Customer '{$customer->name}' was updated.");
+
         return redirect()->route('admin.customers.show', $customer)
             ->with('success', 'Customer updated successfully.');
     }
@@ -127,6 +129,8 @@ class CustomerController extends Controller
 
         $customer->update(['status' => 'blocked']);
 
+        logActivity('Blocked', 'Customer', "Customer '{$customer->name}' was blocked.");
+
         return redirect()->back()->with('success', 'Customer has been blocked.');
     }
 
@@ -137,6 +141,8 @@ class CustomerController extends Controller
         }
 
         $customer->update(['status' => 'active']);
+
+        logActivity('Unblocked', 'Customer', "Customer '{$customer->name}' was unblocked.");
 
         return redirect()->back()->with('success', 'Customer has been unblocked.');
     }
@@ -170,6 +176,8 @@ class CustomerController extends Controller
         }
 
         $customer->delete();
+
+        logActivity('Deleted', 'Customer', "Customer '{$customer->name}' was deleted.");
 
         return redirect()->route('admin.customers.index')
             ->with('success', 'Customer deleted successfully.');

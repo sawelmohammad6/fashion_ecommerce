@@ -84,6 +84,8 @@ class InventoryController extends Controller
             ]);
         });
 
+        logActivity('Stock In', 'Inventory', "{$data['quantity']} units added to '{$product->name}'.");
+
         return redirect()->route('admin.inventory.index')
             ->with('success', "Stock added: {$data['quantity']} units of {$product->name}.");
     }
@@ -129,6 +131,8 @@ class InventoryController extends Controller
                 'date' => $data['date'],
             ]);
         });
+
+        logActivity('Stock Out', 'Inventory', "{$data['quantity']} units removed from '{$product->name}'.");
 
         return redirect()->route('admin.inventory.index')
             ->with('success', "Stock removed: {$data['quantity']} units of {$product->name}.");
@@ -183,6 +187,8 @@ class InventoryController extends Controller
                 'date' => $data['date'],
             ]);
         });
+
+        logActivity('Adjustment', 'Inventory', "Stock adjusted ({$data['action']}) for '{$product->name}'.");
 
         return redirect()->route('admin.inventory.index')
             ->with('success', "Stock adjusted for {$product->name}.");

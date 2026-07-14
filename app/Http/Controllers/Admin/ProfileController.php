@@ -49,6 +49,8 @@ class ProfileController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        logActivity('Password Changed', 'Authentication', "Admin '{$user->name}' changed their password.");
+
         return back()->with('success', 'Password changed successfully.');
     }
 

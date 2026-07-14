@@ -12,6 +12,13 @@ if (!function_exists('getCurrencySymbol')) {
     }
 }
 
+if (!function_exists('logActivity')) {
+    function logActivity(string $action, string $module, ?string $description = null): \App\Models\ActivityLog
+    {
+        return app(\App\Services\ActivityLoggerService::class)->log($action, $module, $description);
+    }
+}
+
 if (!function_exists('formatPrice')) {
     function formatPrice(float|int $amount): string
     {
